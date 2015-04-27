@@ -9,6 +9,11 @@ import edu.monash.honours.spout.SpeedOutputSpout;
 
 public class SpeedCheckTopology
 {
+  /**
+   * The listening port upon which the spout will get data.
+   */
+  public static final int LISTENING_PORT = 8888;
+
   public static void main(String[] args) throws Exception
   {
     TopologyBuilder builder = new TopologyBuilder();
@@ -17,6 +22,7 @@ public class SpeedCheckTopology
     builder.setBolt("speed-check", new SpeedCheckBolt()).shuffleGrouping("speed");
 
     Config conf = new Config();
+    conf.put("spout.listeningPort", LISTENING_PORT);
     conf.setDebug(true);
 
     LocalCluster cluster = new LocalCluster();

@@ -7,31 +7,35 @@ import backtype.storm.topology.base.BaseRichSpout;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Values;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.util.Map;
 
 public class SpeedOutputSpout extends BaseRichSpout
 {
+  private static final String LISTENING_PORT_CONFIG_KEY = "spout.listeningPort";
+
   private SpoutOutputCollector collector;
   private ServerSocket         serverSocket;
 
   /**
    * Runs once when this spout is created.
    *
-   * @param map
+   * @param conf Storm topology configuration map.
    * @param topologyContext
    * @param spoutOutputCollector
    */
-  public void open(final Map map, final TopologyContext topologyContext,
+  public void open(final Map conf, final TopologyContext topologyContext,
                    final SpoutOutputCollector spoutOutputCollector)
   {
     this.collector = spoutOutputCollector;
 
     try {
-      this.serverSocket = new ServerSocket(9000);
+      this.serverSocket = new ServerSocket((int) conf.get(LISTENING_PORT_CONFIG_KEY));
     } catch (IOException e) {
-      e.printStackTrace();
+      this.collector.emit(new Values("ERROR: Cannot open port -\n" + e.getMessage()));
     }
   }
 
@@ -42,10 +46,15 @@ public class SpeedOutputSpout extends BaseRichSpout
    */
   public void nextTuple()
   {
-    double speed = 0;
+    try {
+      BufferedReader bufferedReader = new BufferedReader(
+        (new InputStreamReader(serverSocket.accept().getInputStream())));
+      double speedReading = Double.valueOf(bufferedReader.readLine());
 
-    Values emitTuple = new Values(speed);
-    this.collector.emit(emitTuple);
+      this.collector.emit(new Values(speedReading));
+    } catch (IOException e) {
+      this.collector.emit(new Values("ERROR: Cannot read from port -\n" + e.getMessage()));
+    }
   }
 
   /**
