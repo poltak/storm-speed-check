@@ -12,7 +12,7 @@ public class SpeedCheckTopology
   /**
    * The listening port upon which the spout will get data.
    */
-  public static final int LISTENING_PORT = 8888;
+  public static final String LISTENING_PORT = "8888";
 
   public static void main(String[] args) throws Exception
   {

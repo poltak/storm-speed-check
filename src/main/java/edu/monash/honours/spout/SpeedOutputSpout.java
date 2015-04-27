@@ -15,6 +15,9 @@ import java.util.Map;
 
 public class SpeedOutputSpout extends BaseRichSpout
 {
+  /**
+   * The key in the storm config under which the listening port is declared
+   */
   private static final String LISTENING_PORT_CONFIG_KEY = "spout.listeningPort";
 
   private SpoutOutputCollector collector;
@@ -33,7 +36,7 @@ public class SpeedOutputSpout extends BaseRichSpout
     this.collector = spoutOutputCollector;
 
     try {
-      this.serverSocket = new ServerSocket((int) conf.get(LISTENING_PORT_CONFIG_KEY));
+      this.serverSocket = new ServerSocket(Integer.valueOf((String) conf.get(LISTENING_PORT_CONFIG_KEY)));
     } catch (IOException e) {
       this.collector.emit(new Values("ERROR: Cannot open port -\n" + e.getMessage()));
     }

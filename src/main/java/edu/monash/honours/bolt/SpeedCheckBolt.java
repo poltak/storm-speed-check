@@ -42,7 +42,7 @@ public class SpeedCheckBolt extends BaseRichBolt
     Values emitTuple;
     if (receivedValue instanceof Double) {
       // If received value is a double, check the speed received
-      emitTuple = checkSpeed((double) receivedValue);
+      emitTuple = checkSpeed((Double) receivedValue);
     }
     else {
       // else, ignore processing and send the message onwards
