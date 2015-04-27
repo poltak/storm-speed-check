@@ -12,8 +12,8 @@ import java.util.Map;
 
 public class SpeedCheckBolt extends BaseRichBolt
 {
-  private static int SPEED_UPPER_BOUND = 90;
-  private static int SPEED_LOWER_LIMIT = 0;
+  private final static int SPEED_UPPER_BOUND = 90;
+  private final static int SPEED_LOWER_LIMIT = 0;
 
   private static int totalTupleCount = 0;
   private int             tupleCount;
@@ -37,8 +37,17 @@ public class SpeedCheckBolt extends BaseRichBolt
   {
     updateTupleCounts();
 
-    double speed = tuple.getDouble(0);
-    Values emitTuple = checkSpeed(speed);
+    Object receivedValue = tuple.getValue(0);
+
+    Values emitTuple;
+    if (receivedValue instanceof Double) {
+      // If received value is a double, check the speed received
+      emitTuple = checkSpeed((double) receivedValue);
+    }
+    else {
+      // else, ignore processing and send the message onwards
+      emitTuple = new Values(receivedValue, true);
+    }
 
     this.collector.emit(tuple, emitTuple);
     this.collector.ack(tuple);
@@ -75,4 +84,6 @@ public class SpeedCheckBolt extends BaseRichBolt
 
     return new Values(speed, false);
   }
+
+
 }
